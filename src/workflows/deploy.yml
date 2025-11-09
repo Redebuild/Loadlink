@@ -1,0 +1,97 @@
+name: Deploy LoadLink
+
+# This workflow automatically deploys your app when you push to main branch
+# Uncomment the platform you want to use
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Vercel Deployment (Recommended)
+  deploy-vercel:
+    runs-on: ubuntu-latest
+    if: false  # Set to true to enable automatic Vercel deployment
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      
+      - name: Deploy to Vercel
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # Netlify Deployment
+  deploy-netlify:
+    runs-on: ubuntu-latest
+    if: false  # Set to true to enable automatic Netlify deployment
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+      
+      - name: Deploy to Netlify
+        run: netlify deploy --prod --auth=${{ secrets.NETLIFY_AUTH_TOKEN }} --site=${{ secrets.NETLIFY_SITE_ID }}
+
+  # Firebase Deployment
+  deploy-firebase:
+    runs-on: ubuntu-latest
+    if: false  # Set to true to enable automatic Firebase deployment
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      
+      - name: Deploy to Firebase
+        run: firebase deploy --only hosting --token=${{ secrets.FIREBASE_TOKEN }}
+
+  # Build Test (Always runs to verify build works)
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies (if needed)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found - Figma Make handles builds"
+          fi
+      
+      - name: Run build test (if applicable)
+        run: |
+          if [ -f package.json ] && grep -q '"build"' package.json; then
+            npm run build
+          else
+            echo "No build script - Figma Make handles deployment"
+          fi
